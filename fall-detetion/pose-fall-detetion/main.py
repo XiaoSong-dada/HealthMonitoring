@@ -52,7 +52,7 @@ def process_camera(camera_index: int = 0):
 
         # 目标检测
         results = yolov8_pose.detect_yolov8(frame)
-
+        
         # 跌倒检测和跟踪
         if results:
             detections = []
@@ -68,23 +68,24 @@ def process_camera(camera_index: int = 0):
                     if cls_id == 0:  # 假设类别0是人
                         detections.append(Object((x1, y1, width, height), prob))
 
-            # 更新跟踪器
-            tracks = tracker.update(detections)
+                # 更新跟踪器
+                tracks = tracker.update(detections)
 
-            # 绘制跟踪结果并进行跌倒检测
-            for track in tracks:
-                tlbr = track.tlbr
-                track_id = track.track_id
-                # cv2.rectangle(frame, (int(tlbr[0]), int(tlbr[1])), (int(tlbr[2]), int(tlbr[3])), (0, 255, 0), 2)
-                cv2.putText(frame, f"ID: {track_id}", (int(tlbr[0]), int(tlbr[1]) - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                # 绘制跟踪结果并进行跌倒检测
+                for track in tracks:
+                    tlbr = track.tlbr
+                    track_id = track.track_id
+                    frame = result[0].plot()
+                    # cv2.rectangle(frame, (int(tlbr[0]), int(tlbr[1])), (int(tlbr[2]), int(tlbr[3])), (0, 255, 0), 2)
+                    cv2.putText(frame, f"ID: {track_id}", (int(tlbr[0]), int(tlbr[1]) - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
-                # 获取关键点
-                if hasattr(result, 'keypoints') and result.keypoints is not None:
-                    keypoints = result.keypoints.xy.cpu().numpy().tolist()[0]
-                    confidences = result.keypoints.conf.cpu().numpy().tolist()[0]
-                    fall = yolov8_pose.fall_estimate(keypoints, confidences)
-                    if fall:
-                        cv2.putText(frame, 'Fall Detected', (int(tlbr[0]), int(tlbr[1]) + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+                    # 获取关键点
+                    if hasattr(result, 'keypoints') and result.keypoints is not None:
+                        keypoints = result.keypoints.xy.cpu().numpy().tolist()[0]
+                        confidences = result.keypoints.conf.cpu().numpy().tolist()[0]
+                        fall = yolov8_pose.fall_estimate(keypoints, confidences)
+                        if fall:
+                            cv2.putText(frame, 'Fall Detected', (int(tlbr[0]), int(tlbr[1]) + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
 
         # 显示图像
         cv2.namedWindow("Camera Detection Result", cv2.WINDOW_NORMAL)
