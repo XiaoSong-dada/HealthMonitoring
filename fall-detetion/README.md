@@ -6,3 +6,5 @@
 4. 在本目录`pip install -r requirements.txt`
 5. 之后进入`pose-fall-detetion`目录
 6. 运行`python main.py camera 0`
+
+test
